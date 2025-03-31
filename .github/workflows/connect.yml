@@ -1,0 +1,30 @@
+name: Connect to Expert Server
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Client
+        run: sudo apt-get install -y openssh-client sshpass
+
+      - name: Connect to Server and Run Command
+        env:
+          SERVER_IP: "45.59.132.157"
+          USERNAME: "expert"
+          PASSWORD: "${{ secrets.ZKwx^Zw6z22KspWwc%4p }}"  # Securely using GitHub Secret
+        run: |
+          # Ensure the script exits on failure
+          set -e
+
+          # Mask password for security in logs
+          echo "::add-mask::$PASSWORD"
+
+          # Try SSH connection multiple times in case of failures
+          for i in {1..5}; do
+            sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 $USERNAME@$SERVER_IP "ls -lah" && break
+            echo "Retrying SSH connection... Attempt $i"
+            sleep 5
+          done
